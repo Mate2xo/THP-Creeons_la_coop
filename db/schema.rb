@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_01_08_191652) do
+ActiveRecord::Schema.define(version: 2020_01_30_091200) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -132,6 +132,7 @@ ActiveRecord::Schema.define(version: 2020_01_08_191652) do
     t.string "display_name"
     t.boolean "moderator", default: false
     t.integer "cash_register_proficiency", default: 0
+    t.date "end_subscription"
     t.index "lower((display_name)::text) text_pattern_ops", name: "members_display_name_lower", unique: true
     t.index ["confirmation_token"], name: "index_members_on_confirmation_token"
     t.index ["email"], name: "index_members_on_email", unique: true

@@ -18,6 +18,7 @@ fr:
         edit:
           title: modifier le profil
           change_password: Modifier votre mot de passe
+          end_subscription: "Votre inscription prendra fin le:"
         index:
           all_tab: Tous
           member_unconfirmed: Invitation en attente de confirmation

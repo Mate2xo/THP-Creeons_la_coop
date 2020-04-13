@@ -1,0 +1,8 @@
+en:
+  mailer:
+    member:
+      alert:
+        subject: "end subscription notification" 
+        salutation: "Hello %{member_first_name} %{member_last_name}."
+        end_subscription: "Your subscription will end the %{member_end_subscription}." 
+        remember: "If you wish continue this adventure with us, don't forget to renew your subscription." 

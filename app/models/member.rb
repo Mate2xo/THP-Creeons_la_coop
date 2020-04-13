@@ -26,6 +26,7 @@
 #  invitation_created_at     :datetime
 #  invitation_sent_at        :datetime
 #  invitation_accepted_at    :datetime
+#  end_subscription          :date
 #  invitation_limit          :integer
 #  invited_by_type           :string
 #  invited_by_id             :bigint(8)
@@ -82,6 +83,21 @@ class Member < ApplicationRecord
     admin? || super_admin?
   end
 
+  def renew_subscription_date
+    base = if end_subscription.nil? || end_subscription < Date.today
+             Date.today
+           else
+             end_subscription + 1
+           end
+
+    self.end_subscription = if leap_subscription?(base)
+                              base + 365
+                            else
+                              base + 364
+                            end
+    save
+end
+
   private
 
   def set_unique_display_name
@@ -95,5 +111,13 @@ class Member < ApplicationRecord
     end
 
     self.display_name = display_name
+  end
+
+  def leap_subscription?(base)
+    return true if base.leap? && base.month <= 2
+
+    return true if (base + 365).leap? && base.month > 2
+
+    false
   end
 end

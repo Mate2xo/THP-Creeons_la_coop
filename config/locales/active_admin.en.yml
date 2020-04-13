@@ -38,6 +38,7 @@ en:
     has_many_new: "Add New %{model}"
     has_many_delete: "Delete"
     has_many_remove: "Remove"
+    renew_member_alert: "The subscriptions of selected members have been renewed"
     move: "Move"
     filters:
       buttons:
@@ -90,14 +91,16 @@ en:
     batch_actions:
       button_label: "Batch Actions"
       default_confirmation: "Are you sure you want to do this?"
+      renew_confirmation: "Are you sure you want to renew these subscriptions?"
       delete_confirmation: "Are you sure you want to delete these %{plural_model}?"
       succesfully_destroyed:
         one: "Successfully destroyed 1 %{model}"
         other: "Successfully destroyed %{count} %{plural_model}"
       selection_toggle_explanation: "(Toggle Selection)"
-      action_label: "%{title} Selected"
+      action_label: "%{title} selected elements"
       labels:
-        destroy: "Delete"
+        destroy: "Delete the"
+        renew: "Renew subscriptions for the"
     comments:
       created_at: "Created"
       resource_type: "Resource Type"

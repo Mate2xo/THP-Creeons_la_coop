@@ -78,6 +78,7 @@ fr:
           member: Membre
           admin: Administrateur
           super_admin: Administrateur général
+        end_subscription: Fin d'adhésion
       mission:
         author: Auteur
         description: Description

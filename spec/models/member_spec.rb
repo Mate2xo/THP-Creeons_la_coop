@@ -26,6 +26,7 @@
 #  invitation_created_at     :datetime
 #  invitation_sent_at        :datetime
 #  invitation_accepted_at    :datetime
+#  end_subscription          :date
 #  invitation_limit          :integer
 #  invited_by_type           :string
 #  invited_by_id             :bigint(8)
@@ -50,6 +51,8 @@ RSpec.describe Member, type: :model do
       it { is_expected.to have_db_column(:display_name).of_type(:string) }
       it { is_expected.to have_db_column(:biography).of_type(:text) }
       it { is_expected.to have_db_column(:phone_number).of_type(:string) }
+      it { is_expected.to have_db_column(:confirmed_at).of_type(:datetime) }
+      it { is_expected.to have_db_column(:end_subscription).of_type(:date) }
       it { is_expected.to have_db_column(:role).of_type(:integer) }
       it { is_expected.to define_enum_for(:role) }
       it { is_expected.to have_db_column(:group).of_type(:integer) }
@@ -159,5 +162,157 @@ RSpec.describe Member, type: :model do
 
       it { is_expected.not_to be_thredded_admin }
     end
+  end
+
+  describe "#renew_subscription" do
+    # This tests check if the method renew_subscription_date update correctly the end_subscription date.
+    # The method must manage the leapyears.
+    # If a year is a multiple of 4, it is a leapyear.
+    # If a year is a multiple of 100 and not a multiple of 400, it is not a leapyear.
+    # If a year is a multiple of 400 and ,it is a leapyear.
+
+    context "when a member subscribes for the first time" do
+      let (:hash_dates) { set_dates_for_first_inscription_and_outdated_contexts }
+      let (:setup_member_end_subscription) { nil }
+
+      context "when the year is not a leapyear" do
+        it "sets the end_subscription date to one year after the current day" do
+          renew_subscription_test(setup_today: hash_dates[:generale_case_1][:today], setup_member_end_subscription: setup_member_end_subscription, expectation: hash_dates[:generale_case_1][:expectation])
+          renew_subscription_test(setup_today: hash_dates[:generale_case_2][:today], setup_member_end_subscription: setup_member_end_subscription, expectation: hash_dates[:generale_case_2][:expectation])
+          renew_subscription_test(setup_today: hash_dates[:generale_case_3][:today], setup_member_end_subscription: setup_member_end_subscription, expectation: hash_dates[:generale_case_3][:expectation])
+        end
+      end
+
+      context "when the year is a multiple_of_4" do
+        it "sets the end_subscription date to one year after the current day" do
+          renew_subscription_test(setup_today: hash_dates[:multiple_of_4][:today], setup_member_end_subscription: setup_member_end_subscription, expectation: hash_dates[:multiple_of_4][:expectation])
+        end
+      end
+
+      context "when the year is a multiple_of_100" do
+        it "sets the end_subscription date to one year after the current day" do
+          renew_subscription_test(setup_today: hash_dates[:multiple_of_100][:today], setup_member_end_subscription: setup_member_end_subscription, expectation: hash_dates[:multiple_of_100][:expectation])
+        end
+      end
+
+      context "when the year is a multiple_of_400" do
+        it "sets the end_subscription date to one year after the current day" do
+          renew_subscription_test(setup_today: hash_dates[:multiple_of_400][:today], setup_member_end_subscription: setup_member_end_subscription, expectation: hash_dates[:multiple_of_400][:expectation])
+        end
+      end
+
+      context "when the day is 29 february" do
+        it "sets the end_subscription date to one year after the current day" do
+          renew_subscription_test(setup_today: hash_dates[:february_29][:today], setup_member_end_subscription: setup_member_end_subscription, expectation: hash_dates[:february_29][:expectation])
+        end
+      end
+    end
+
+    context "when the subscription is outdated" do
+      let (:hash_dates) { set_dates_for_first_inscription_and_outdated_contexts }
+      let (:setup_member_end_subscription) { Date.new(1800, 5, 5) }
+
+      context "when the year is not a leapyear" do
+        it "sets the end_subscription date to one year after the current day" do
+          renew_subscription_test(setup_today: hash_dates[:generale_case_1][:today], setup_member_end_subscription: setup_member_end_subscription, expectation: hash_dates[:generale_case_1][:expectation])
+          renew_subscription_test(setup_today: hash_dates[:generale_case_2][:today], setup_member_end_subscription: setup_member_end_subscription, expectation: hash_dates[:generale_case_2][:expectation])
+          renew_subscription_test(setup_today: hash_dates[:generale_case_3][:today], setup_member_end_subscription: setup_member_end_subscription, expectation: hash_dates[:generale_case_3][:expectation])
+        end
+      end
+
+      context "when the year is a multiple_of_4" do
+        it "sets the end_subscription date to one year after the current day" do
+          renew_subscription_test(setup_today: hash_dates[:multiple_of_4][:today], setup_member_end_subscription: setup_member_end_subscription, expectation: hash_dates[:multiple_of_4][:expectation])
+        end
+      end
+
+      context "when the year is a multiple_of_100" do
+        it "sets the end_subscription date to one year after the current day" do
+          renew_subscription_test(setup_today: hash_dates[:multiple_of_100][:today], setup_member_end_subscription: setup_member_end_subscription, expectation: hash_dates[:multiple_of_100][:expectation])
+        end
+      end
+
+      context "when the year is a multiple_of_400" do
+        it "sets the end_subscription date to one year after the current day" do
+          renew_subscription_test(setup_today: hash_dates[:multiple_of_400][:today], setup_member_end_subscription: setup_member_end_subscription, expectation: hash_dates[:multiple_of_400][:expectation])
+        end
+      end
+
+      context "when the day is 29 february" do
+        it "sets the end_subscription date to one year after the current day" do
+          renew_subscription_test(setup_today: hash_dates[:february_29][:today], setup_member_end_subscription: setup_member_end_subscription, expectation: hash_dates[:february_29][:expectation])
+        end
+      end
+    end
+
+    context "when is subscription is still active" do
+      let (:hash_dates) { set_dates_for_still_active_context }
+
+      context "when the year is not a leapyear" do
+        it "sets the end_subscription date to one year and one day after the end of subscription" do
+          renew_subscription_test(setup_today: hash_dates[:generale_case_1][:today], setup_member_end_subscription: hash_dates[:generale_case_1][:member_end_subscription], expectation: hash_dates[:generale_case_1][:expectation])
+          renew_subscription_test(setup_today: hash_dates[:generale_case_2][:today], setup_member_end_subscription: hash_dates[:generale_case_2][:member_end_subscription], expectation: hash_dates[:generale_case_2][:expectation])
+          renew_subscription_test(setup_today: hash_dates[:generale_case_3][:today], setup_member_end_subscription: hash_dates[:generale_case_3][:member_end_subscription], expectation: hash_dates[:generale_case_3][:expectation])
+        end
+      end
+
+      context "when the year is a multiple_of_4" do
+        it "sets the end_subscription date to one year and one day after the end of subscription" do
+          renew_subscription_test(setup_today: hash_dates[:multiple_of_4][:today], setup_member_end_subscription: hash_dates[:multiple_of_4][:member_end_subscription], expectation: hash_dates[:multiple_of_4][:expectation])
+        end
+      end
+
+      context "when the year is a multiple_of_100" do
+        it "sets the end_subscription date to one year and one day after the end of subscription" do
+          renew_subscription_test(setup_today: hash_dates[:multiple_of_100][:today], setup_member_end_subscription: hash_dates[:multiple_of_100][:member_end_subscription], expectation: hash_dates[:multiple_of_100][:expectation])
+        end
+      end
+
+      context "when the year is a multiple_of_400" do
+        it "sets the end_subscription date to one year and one day after the end of subscription" do
+          renew_subscription_test(setup_today: hash_dates[:multiple_of_400][:today], setup_member_end_subscription: hash_dates[:multiple_of_400][:member_end_subscription], expectation: hash_dates[:multiple_of_400][:expectation])
+        end
+      end
+
+      context "when the day is 29 february" do
+        it "sets the end_subscription date to one year and one day after the end of subscription" do
+          renew_subscription_test(setup_today: hash_dates[:february_29][:today], setup_member_end_subscription: hash_dates[:february_29][:member_end_subscription], expectation: hash_dates[:february_29][:expectation])
+        end
+      end
+    end
+  end
+
+  def renew_subscription_test(setup_today:, setup_member_end_subscription:, expectation:)
+    member = build :member, end_subscription: :setup_member_end_subscription
+    allow(Date).to receive(:today) { setup_today }
+    member.end_subscription = setup_member_end_subscription
+
+    member.renew_subscription_date
+
+    expect(member.end_subscription).to eq expectation
+  end
+
+  def set_dates_for_first_inscription_and_outdated_contexts
+    hash_dates = {}
+    hash_dates[:generale_case_1] = { today: Date.new(2001, 2, 5), expectation: Date.new(2002, 2, 4) }
+    hash_dates[:generale_case_2] = { today: Date.new(2121, 7, 21), expectation: Date.new(2122, 7, 20) }
+    hash_dates[:generale_case_3] = { today: Date.new(2023, 2, 1), expectation: Date.new(2024, 1, 31) }
+    hash_dates[:multiple_of_4] = { today: Date.new(2020, 2, 5), expectation: Date.new(2021, 2, 4) }
+    hash_dates[:multiple_of_100] = { today: Date.new(2100, 11, 15), expectation: Date.new(2101, 11, 14) }
+    hash_dates[:multiple_of_400] = { today: Date.new(2399, 10, 24), expectation: Date.new(2400, 10, 23) }
+    hash_dates[:february_29] = { today: Date.new(2060, 2, 29), expectation: Date.new(2061, 2, 28) }
+    hash_dates
+  end
+
+  def set_dates_for_still_active_context
+    hash_dates = {}
+    hash_dates[:generale_case_1] = { today: Date.new(2001, 2, 5), member_end_subscription: Date.new(2001, 4, 7), expectation: Date.new(2002, 4, 7) }
+    hash_dates[:generale_case_2] = { today: Date.new(2121, 7, 21), member_end_subscription: Date.new(2121, 10, 5), expectation: Date.new(2122, 10, 5) }
+    hash_dates[:generale_case_3] = { today: Date.new(3014, 5, 5), member_end_subscription: Date.new(3015, 2, 2), expectation: Date.new(3016, 2, 2) }
+    hash_dates[:multiple_of_4] = { today: Date.new(2004, 2, 5), member_end_subscription: Date.new(2004, 2, 12), expectation: Date.new(2005, 2, 12) }
+    hash_dates[:multiple_of_100] = { today: Date.new(2099, 11, 11), member_end_subscription: Date.new(2100, 1, 11), expectation: Date.new(2101, 1, 11) }
+    hash_dates[:multiple_of_400] = { today: Date.new(2399, 10, 24), member_end_subscription: Date.new(2400, 2, 9), expectation: Date.new(2401, 2, 9) }
+    hash_dates[:february_29] = { today: Date.new(2024, 1, 24), member_end_subscription: Date.new(2024, 2, 29), expectation: Date.new(2025, 2, 28) }
+    hash_dates
   end
 end

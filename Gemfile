@@ -52,6 +52,7 @@ group :development, :test do
   gem 'guard-rspec', require: false
   gem 'pry-byebug', '~> 3.6'
   gem 'rspec-rails', '~> 3.7', '>= 3.7.2'
+  gem 'whenever', require: false
 end
 
 group :development do

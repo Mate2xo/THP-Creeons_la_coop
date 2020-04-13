@@ -12,6 +12,7 @@ en:
         edit:
           title: modify profile
           change_password: Change password
+          end_subscription: "Your subscription will be ended the:"
         index:
           all_tab: All
         show:

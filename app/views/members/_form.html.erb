@@ -57,6 +57,15 @@
           {},
           class:'form-control' %>
       </div>
+      <br>
+      <div class="field">
+      <% if member.end_subscription.present? %>
+        <%= label :end_subscription, t("main_app.views.members.edit.end_subscription") %>
+			</br>
+					<%= label :end_subscription, value: member.end_subscription.strftime('%d-%m-%Y') %>
+      <% end %>
+			</div>
+
 
     </div>
   </div>
