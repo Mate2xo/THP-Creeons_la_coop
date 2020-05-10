@@ -55,6 +55,7 @@ fr:
           beginner: débutant à la caisse
           proficient: formé à la caisse
         email: E-mail
+        register_id: Numéro de caisse
         first_name: Prénom
         group: Groupe
         groups:

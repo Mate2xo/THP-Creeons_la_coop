@@ -1,25 +1,27 @@
 # frozen_string_literal: true
 
+# rubocop: disable Metrics/BlockLength
 ActiveAdmin.register Member do
-  permit_params :email, :encrypted_password, :first_name, :last_name, :biography,
-                :phone_number, :role, :moderator, :group, :confirmed_at,
-                :password, :password_confirmation, :cash_register_proficiency
+  permit_params :email, :password, :encrypted_password, :first_name, :last_name,
+                :biography, :phone_number, :role, :moderator, :group, :confirmed_at,
+                :password_confirmation, :cash_register_proficiency, :register_id
 
   index do
     selectable_column
     column :first_name
     column :last_name
     column :role
-    column '3 heures faites?' do |member| member.worked_three_hours?(Date.current) end
-    column :group do |member| Member.human_enum_name(:group, member.group) end
+    column('3 heures faites?') { |member| member.worked_three_hours?(Date.current) }
+    column(:group) { |member| Member.human_enum_name(:group, member.group) }
     column :cash_register_proficiency
+    column :register_id
     column :email
     actions
   end
 
   form do |f|
-    f.inputs :first_name, :last_name, :email, :phone_number, :role,
-             :moderator, :group, :cash_register_proficiency, :biography
+    f.inputs :first_name, :last_name, :email, :phone_number, :role, :moderator,
+             :group, :cash_register_proficiency, :register_id, :biography
     actions
   end
 
@@ -56,3 +58,4 @@ ActiveAdmin.register Member do
     end
   end
 end
+# rubocop: enable Metrics/BlockLength
