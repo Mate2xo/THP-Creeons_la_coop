@@ -16,6 +16,8 @@ en:
     errors:
       models:
         mission:
+          inconsistent_datetimes_for_related_enrollments: At last one enrollment is outside the mission's period
+          mismatch_between_time_slots_and_related_enrollments: Mismatch_between_time_slots_and_related_enrollments
           attributes:
             duration:
               maximum: must be less than or equal to 10 hours

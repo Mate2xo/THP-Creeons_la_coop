@@ -1,0 +1,13 @@
+en:
+  admin:
+    missions:
+      create:
+        mission_created: The mission has beem created
+      update:
+        confirm_update: The mission has been updated
+  missions:
+    update:
+      confirm_update: The mission has been updated
+    destroy:
+
+

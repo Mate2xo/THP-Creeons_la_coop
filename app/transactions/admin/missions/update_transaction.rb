@@ -6,72 +6,59 @@ module Admin
     class UpdateTransaction
       include Dry::Transaction
 
-      around :rollback_if_failure
-
-      tee :remove_datetime_attributes_if_recurrent_option
+      tee :convert_datepicker_params_in_datetime
+      tee :prepare_object
+      step :validation
       step :update_mission
-      tee :get_updatable_missions
-      step :update_recurrently_other_missions
 
       private
 
-      def rollback_if_failure(input, &block)
-        result = nil
+      def convert_datepicker_params_in_datetime(input)
+        return Success(input) unless input[:params]['start_date(1i)']
 
-        Mission.transaction do
-          result = block.call(Success(input))
-          raise ActiveRecord::Rollback if result.failure?
-
-          result
-        end
-        result
-      end
-
-      def remove_datetime_attributes_if_recurrent_option(input)
-        return Success(input) unless input[:params][:recurrent_change]
-
-        input[:params].delete(:start_date)
-        input[:params].delete(:due_date)
-
+        start_date = convert_params_in_datetime(input[:params], 'start_date')
+        due_date = convert_params_in_datetime(input[:params], 'due_date')
+        input[:params].merge!(start_date: start_date, due_date: due_date)
         Success(input)
       end
 
-      def update_mission(input, mission:)
-        if mission.update(input[:params])
-          Success(input)
+      def prepare_object(input)
+        mission = input[:mission]
+        params = input[:params]
+
+        params.keys.each do |current_key| # rubocop:disable Style/HashEachMethods
+          mission[current_key] = params[current_key] if mission.attributes.keys.include?(current_key)
+        end
+      end
+
+      def validation(input)
+        mission = input[:mission]
+        mission.check_if_enrollments_are_inside_new_mission_s_period
+        mission.check_if_enrollments_match_a_mission_s_time_slots_for_regulated_mission
+        return Failure(mission.errors.values.flatten[0]) if mission.errors.present?
+
+        Success(mission)
+      end
+
+      def update_mission(mission)
+        if mission.save
+          Success(mission)
         else
-          failure_message = I18n.t('activerecord.errors.messages.update_fail')
+          failure_message = mission.errors.full_messages.join
           Failure(failure_message)
         end
       end
 
-      def get_updatable_missions(input, old_mission:)
-        return Success(input) unless input[:params][:recurrent_change]
-
-        input.merge!({ missions: updatable_missions(old_mission) })
-        Success(input)
-      end
-
-      def update_recurrently_other_missions(input)
-        return Success(input) unless input[:params][:recurrent_change]
-
-        failure_message = I18n.t('activerecord.errors.messages.update_fail')
-
-        input[:missions].each do |mission|
-          return Failure(failure_message) unless mission.update(input[:params])
-        end
-        Success(input)
-      end
-
       # helpers
 
-      def updatable_missions(old_mission)
-        missions = Mission.where('start_date > :old_mission_start_date AND genre = :old_mission_genre',
-                                 old_mission_start_date: old_mission.start_date,
-                                 old_mission_genre: Mission.genres[old_mission.genre])
-        missions.select do |mission|
-          mission.start_date.strftime('%R%u') == old_mission.start_date.strftime('%R%u')
-        end
+      def convert_params_in_datetime(params, key)
+        DateTime.new(
+          params["#{key}(1i)"].to_i,
+          params["#{key}(2i)"].to_i,
+          params["#{key}(3i)"].to_i,
+          params["#{key}(4i)"].to_i,
+          params["#{key}(5i)"].to_i
+        )
       end
     end
   end

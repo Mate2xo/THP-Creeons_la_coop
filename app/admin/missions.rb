@@ -83,12 +83,24 @@ ActiveAdmin.register Mission do
   end
 
   controller do
-    def update
-      if update_transaction.success?
-        flash[:notice] = translate 'activerecord.notices.messages.update_success'
+    def create # rubocop:disable Metrics/AbcSize
+      build_resource
+      if resource.save
+        flash[:notice] = translate '.record_created'
         redirect_to admin_mission_path(resource.id)
       else
-        flash[:error] = update_transaction.failure
+        flash[:error] = resource.errors.full_messages.join
+        render :new
+      end
+    end
+
+    def update
+      transaction_result = update_transaction
+      if transaction_result.success?
+        flash[:notice] = translate '.confirm_update'
+        redirect_to admin_mission_path(resource.id)
+      else
+        flash[:error] = transaction_result.failure
         render :edit
       end
     end
@@ -96,16 +108,12 @@ ActiveAdmin.register Mission do
     private
 
     def update_transaction
-      @update_transaction ||=
-        begin
-          Admin::Missions::UpdateTransaction
-            .new
-            .with_step_args(
-              update_mission: [mission: resource],
-              get_updatable_missions: [old_mission: resource]
-            )
-            .call({ params: permitted_params[:mission] })
-        end
+      input = { params: permitted_params[:mission], mission: resource }
+      if permitted_params[:mission][:recurrent_change]
+        Admin::Missions::RecurrentUpdateTransaction.new.call(input)
+      else
+        Admin::Missions::UpdateTransaction.new.call(input)
+      end
     end
   end
 

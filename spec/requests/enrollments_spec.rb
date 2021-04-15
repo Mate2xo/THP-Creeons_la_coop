@@ -11,7 +11,7 @@ RSpec.describe 'Enrollments', type: :request do
   end
 
   describe 'POST mission_enrollments_path' do
-    subject(:enroll) { post mission_enrollments_path(mission), params: params }
+    subject(:post_enrollment) { post mission_enrollments_path(mission), params: params }
 
     before { sign_in current_member }
 
@@ -27,7 +27,7 @@ RSpec.describe 'Enrollments', type: :request do
     let(:params) { { enrollment: enrollment } }
 
     it 'creates an enrollment on the given mission' do
-      enroll
+      post_enrollment
       expect(mission.reload.enrollments.size).to eq 1
     end
 
@@ -46,14 +46,14 @@ RSpec.describe 'Enrollments', type: :request do
       let(:params) { { enrollment: enrollment } }
 
       it 'creates an enrollment on the given mission' do
-        enroll
+        post_enrollment
         expect(mission.reload.enrollments.size).to eq 1
       end
     end
 
     context 'without a member field' do
       it 'enrolls the current_member to the mission' do
-        enroll
+        post_enrollment
         expect(Enrollment.last.member_id).to eq current_member.id
       end
     end
@@ -64,7 +64,7 @@ RSpec.describe 'Enrollments', type: :request do
       it 'enrolls the given member to the mission' do
         enrollment.merge!(member_id: other_member.id)
 
-        enroll
+        post_enrollment
 
         expect(Enrollment.last.member_id).to eq other_member.id
       end
@@ -74,7 +74,7 @@ RSpec.describe 'Enrollments', type: :request do
       let(:params) { { enrollment: { member_id: '0' } } }
 
       it 'sets a feedback message to the user' do
-        enroll
+        post_enrollment
         expect(flash[:alert]).not_to be_blank
       end
     end

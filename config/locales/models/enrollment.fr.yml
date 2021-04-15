@@ -1,0 +1,12 @@
+fr:
+  activerecord:
+    errors:
+      models:
+        enrollment:
+          full_mission: Il n y a plus de place disponible pour cette mission
+          inconsistent_datetimes: Les dates sélectionnées sont situées hors de la période de la mission
+          insufficient_cash_register_proficiency: Le membre sélectionné n'a pas une maîtrise suffisante de la caisse
+          member_already_enrolled: Le membre sélectionné est déjâ inscrit à cette mission
+          negative_duration: La durée sélectionnée ne peut pas être négative
+          slot_unavailability: Il n y a plus de place disponible pour ce créneaux
+          time_slot_mismatch: La période indiquée ne correspond à aucun créneau de la mission

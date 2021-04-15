@@ -28,7 +28,9 @@ FactoryBot.define do
     start_date do
       Faker::Time.between_dates(from: Date.current.at_beginning_of_week,
                                 to: Date.current.at_end_of_week,
-                                period: :day).to_datetime
+                                period: :day)
+                 .beginning_of_minute
+                 .to_datetime
     end
     due_date { start_date + 3.hours }
     association :author, factory: :member
